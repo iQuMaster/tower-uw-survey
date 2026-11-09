@@ -56,16 +56,16 @@ const S={L:new Set(),T:new Set(),S:new Set(),O:new Set(),U:new Set()};let ls=2;
 const G=[["L","1. Tournament league",D.L.map((x,i)=>[i,x])],["T","2. Tier farming",D.T.map((x,i)=>[i,x])],["S","3. Primary strategy",D.S.map((x,i)=>[i,x]).filter(([i,x])=>!/^Zero Orb/.test(x))],["O","4. Ownership of each UW",OWN.map((x,i)=>[i,x])],["U","Ultimate weapons shown",UW.map((x,i)=>[i,x])]];
 const ownOk=o=>!S.O.size||(S.O.has(0)&&o==0)||(S.O.has(1)&&o>=1)||(S.O.has(2)&&o==2);
 const f=(n,d=2)=>n==null?"–":n.toFixed(d);
-function chips(){document.getElementById("f").innerHTML=G.map(([k,t,it])=>`<div class="fg"><b>${t}</b>${it.map(([i,x])=>`<button class="ch${S[k].has(i)?" on":""}" data-k="${k}" data-i="${i}">${k=="U"?ic(i):""}${k=="U"?x+" ("+AB[i]+")":x}${"LTS".includes(k)?` <small>${D.R.filter(r=>r[{L:0,T:1,S:2}[k]]==i).length}</small>`:""}</button>`).join("")}</div>`).join("")}
+function chips(){const C=calc();const ok=[o=>o==0,o=>o>=1,o=>o==2];const cn=(k,i)=>k=="U"?C.rows3.filter(r=>ownOk(+r[3][i])).length:k=="O"?C.rows3.filter(r=>C.us.some(u=>ok[i](+r[3][u]))).length:D.R.filter(r=>r[{L:0,T:1,S:2}[k]]==i).length;document.getElementById("f").innerHTML=G.map(([k,t,it])=>`<div class="fg"><b>${t}</b>${it.map(([i,x])=>`<button class="ch${S[k].has(i)?" on":""}" data-k="${k}" data-i="${i}">${k=="U"?ic(i):""}${k=="U"?x+" ("+AB[i]+")":x} <small>${cn(k,i)}</small></button>`).join("")}</div>`).join("")}
 function calc(){
- const rows=D.R.filter(r=>(!S.L.size||S.L.has(r[0]))&&(!S.T.size||S.T.has(r[1]))&&(!S.S.size||S.S.has(r[2])));
+ const rows3=D.R.filter(r=>(!S.L.size||S.L.has(r[0]))&&(!S.T.size||S.T.has(r[1]))&&(!S.S.size||S.S.has(r[2])));
  const us=UW.map((_,i)=>i).filter(u=>!S.U.size||S.U.has(u));
- const res=us.map(u=>{const s=rows.filter(r=>ownOk(+r[3][u]));
+ const res=us.map(u=>{const s=rows3.filter(r=>ownOk(+r[3][u]));
   const avg=CAT.map((_,c)=>{const v=s.map(r=>+r[4][c*9+u]).filter(x=>x);return v.length?v.reduce((a,b)=>a+b)/v.length:null});
   const tot=avg.some(a=>a==null)?(avg.every(a=>a==null)?null:avg.reduce((a,b)=>a+(b||0),0)):avg.reduce((a,b)=>a+b,0);
   const a=s.map(r=>+r[5][u]).filter(x=>x),pc=b=>a.length?100*a.filter(x=>x&b).length/a.length:null;
   return{u,n:s.length,avg,tot,lf:[pc(1),pc(2),pc(4)],na:a.length}});
- return{rows,res}}
+ return{rows:rows3.filter(r=>us.some(u=>ownOk(+r[3][u]))),res,rows3,us}}
 function draw(){
  const{rows,res}=calc();
  document.getElementById("cnt").textContent=`${rows.length} of ${D.R.length} responses match`;
