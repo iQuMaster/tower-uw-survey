@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Tower – Ultimate Weapon Ranking</title>
+<title>The Tower – Ultimate Weapon Ranking (weighted)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap">
 <style>
 :root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#070c1c;--panel:#0e1732;--line:#22335f;--tx:#e6efff;--mut:#8ea3d0;--cy:#3de0ff;--gold:#ffd24a}
@@ -29,7 +29,7 @@ h2{font-size:clamp(13px,2.6vw,17px);margin-bottom:10px;color:var(--cy)}
 .big .r{margin:8px 0}.big .tr{height:34px}.big .tr i{line-height:34px;font-size:12px;letter-spacing:-.02em}.big .v{font-size:19px;color:var(--gold)}
 .lg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:6px;font-size:14px}.lg u{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;text-decoration:none}
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px}.g .card{margin:0}
-.lr{display:grid;grid-template-columns:64px repeat(3,1fr);gap:8px;align-items:center;margin:5px 0}.lr .tr{position:relative}.lr em{position:absolute;left:8px;top:0;font:700 13px/24px Rajdhani,sans-serif;font-style:normal;color:#fff;text-shadow:0 0 3px #000}.hd b{color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}.hd b.on{color:var(--gold)}.ov{overflow-x:auto}table{border-collapse:separate;border-spacing:3px;width:100%;min-width:420px}
+.lr{display:grid;grid-template-columns:64px repeat(3,1fr);gap:8px;align-items:center;margin:5px 0}.lr .tr{position:relative}.lr em{position:absolute;left:8px;top:0;font:700 13px/24px Rajdhani,sans-serif;font-style:normal;color:#fff;text-shadow:0 0 3px #000}.hd b{color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer}.hd b.on{color:var(--gold)}.lg{align-items:center;gap:8px 14px}.wl{display:inline-flex;align-items:center;gap:4px;background:#0a1330;border:1px solid var(--line);border-radius:8px;padding:2px 6px}.wl em{font-style:normal;color:var(--gold);min-width:42px;text-align:right}.wb{background:#13224d;border:1px solid var(--line);color:var(--tx);border-radius:5px;width:26px;height:24px;font-size:11px;line-height:1;padding:0;cursor:pointer}.wb:active{background:#0f3a55}.ov{overflow-x:auto}table{border-collapse:separate;border-spacing:3px;width:100%;min-width:420px}
 th{color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;padding:4px}th.on{color:var(--gold)}
 td{text-align:center;padding:7px 4px;border-radius:6px;font-variant-numeric:tabular-nums}td.l{text-align:left;background:none;white-space:nowrap}
 .note{color:var(--mut);font-size:13px;margin-top:8px}.e{color:var(--mut);padding:12px}
@@ -38,7 +38,7 @@ td{text-align:center;padding:7px 4px;border-radius:6px;font-variant-numeric:tabu
 <h1>The Tower <span>· Ultimate Weapon Ranking</span></h1>
 <div class="sub">Community survey results. Pick filters to explore. No selection in a group means all.</div>
 <div class="card"><div class="top"><h2>Filters</h2><div><span id="cnt" class="sub"></span> <button class="rs" id="rs">Reset all</button></div></div><div id="f"></div></div>
-<div class="card big"><h2>Total score · sum of the six category averages (max 30)</h2><div class="lg" id="lg"></div><div id="tot"></div><div class="note">Bar length is relative to the highest total shown.</div></div>
+<div class="card big"><h2>Total score · weighted sum of the six category averages</h2><div class="lg" id="lg"></div><div id="tot"></div><div class="note">Weights affect only this chart. Each segment shows category average × weight. Bar length is relative to the highest total shown.</div></div>
 <div class="g" id="cats"></div>
 <div class="card" style="margin-top:16px"><h2>Lifetime value · share of respondents who see the UW fitting each game phase</h2><div id="lf"></div><div class="note">Multiple phases could be chosen per UW, so a row can add up to more than 100%. Click a column to sort.</div></div>
 <p class="note">Unofficial fan project, not affiliated with the game developer. Ownership filter applies per UW: a response counts for a UW only if the respondent's status for that UW matches.</p>
@@ -52,7 +52,7 @@ const IM=["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAA
 const CAT=[["Attack","#ff5a5a"],["Defense","#4da3ff"],["Utility","#ffd24a"],["Crowd Control","#b36bff"],["Synergy","#3de0b0"],["Cost Efficiency","#ff9a3c"]];
 const OWN=["Not owned","Owned (UW or UW+)","Has UW+"];
 const ic=u=>`<img src="${IM[u]}" alt="">`;
-const S={L:new Set(),T:new Set(),S:new Set(),O:new Set(),U:new Set()};let ls=2;
+const S={L:new Set(),T:new Set(),S:new Set(),O:new Set(),U:new Set()};let ls=2;const W=[100,100,100,100,100,100];
 const G=[["L","1. Tournament league",D.L.map((x,i)=>[i,x])],["T","2. Tier farming",D.T.map((x,i)=>[i,x])],["S","3. Primary strategy",D.S.map((x,i)=>[i,x]).filter(([i,x])=>!/^Zero Orb/.test(x))],["O","4. Ownership of each UW",OWN.map((x,i)=>[i,x])],["U","Ultimate weapons shown",UW.map((x,i)=>[i,x])]];
 const ownOk=o=>!S.O.size||(S.O.has(0)&&o==0)||(S.O.has(1)&&o>=1)||(S.O.has(2)&&o==2);
 const f=(n,d=2)=>n==null?"–":n.toFixed(d);
@@ -62,7 +62,7 @@ function calc(){
  const us=UW.map((_,i)=>i).filter(u=>!S.U.size||S.U.has(u));
  const res=us.map(u=>{const s=rows3.filter(r=>ownOk(+r[3][u]));
   const avg=CAT.map((_,c)=>{const v=s.map(r=>+r[4][c*9+u]).filter(x=>x);return v.length?v.reduce((a,b)=>a+b)/v.length:null});
-  const tot=avg.some(a=>a==null)?(avg.every(a=>a==null)?null:avg.reduce((a,b)=>a+(b||0),0)):avg.reduce((a,b)=>a+b,0);
+  const tot=avg.every(a=>a==null)?null:avg.reduce((t,a,c)=>t+(a||0)*W[c]/100,0);
   const a=s.map(r=>+r[5][u]).filter(x=>x),pc=b=>a.length?100*a.filter(x=>x&b).length/a.length:null;
   return{u,n:s.length,avg,tot,lf:[pc(1),pc(2),pc(4)],na:a.length}});
  return{rows:rows3.filter(r=>us.some(u=>ownOk(+r[3][u]))),res,rows3,us}}
@@ -70,8 +70,8 @@ function draw(){
  const{rows,res}=calc();
  document.getElementById("cnt").textContent=`${rows.length} of ${D.R.length} responses match`;
  const sd=(a,k)=>[...a].sort((x,y)=>(k(y)??-1)-(k(x)??-1));
- document.getElementById("lg").innerHTML=CAT.map(c=>`<span><u style="background:${c[1]}"></u>${c[0]}</span>`).join("");
- const mx=Math.max(1,...res.map(r=>r.tot||0));document.getElementById("tot").innerHTML=sd(res,r=>r.tot).map(r=>`<div class="r"><div class="n" title="${UW[r.u]}">${ic(r.u)}${AB[r.u]}</div><div class="tr">${r.tot==null?'<span class="e">no data</span>':r.avg.map((a,c)=>a==null?"":`<i title="${CAT[c][0]}: ${f(a)}" style="width:${a/mx*100}%;background:${CAT[c][1]}">${f(a,1)}</i>`).join("")}</div><div class="v">${f(r.tot)}</div></div>`).join("");
+ document.getElementById("lg").innerHTML=CAT.map((c,i)=>`<span class="wl"><u style="background:${c[1]}"></u>${c[0]} <em>${W[i]}%</em><button class="wb" data-w="${i}" data-d="1" aria-label="Increase ${c[0]} weight">▲</button><button class="wb" data-w="${i}" data-d="-1" aria-label="Decrease ${c[0]} weight">▼</button></span>`).join("")+`<button class="rs" id="wr">Reset weights</button>`;
+ const mx=Math.max(1,...res.map(r=>r.tot||0));document.getElementById("tot").innerHTML=sd(res,r=>r.tot).map(r=>`<div class="r"><div class="n" title="${UW[r.u]}">${ic(r.u)}${AB[r.u]}</div><div class="tr">${r.tot==null?'<span class="e">no data</span>':r.avg.map((a0,c)=>{const a=a0==null?0:a0*W[c]/100;return a==0?"":`<i title="${CAT[c][0]}: ${f(a0)} × ${W[c]}%" style="width:${a/mx*100}%;background:${CAT[c][1]}">${f(a,1)}</i>`}).join("")}</div><div class="v">${f(r.tot)}</div></div>`).join("");
  document.getElementById("cats").innerHTML=CAT.map((c,ci)=>`<div class="card"><h2 style="color:${c[1]}">${c[0]} value · avg 1–5</h2>${sd(res,r=>r.avg[ci]).map(r=>`<div class="r"><div class="n" title="${UW[r.u]}">${ic(r.u)}${AB[r.u]}</div><div class="tr"><i title="n=${r.n}" style="width:${(r.avg[ci]||0)/5*100}%;background:${c[1]}"></i></div><div class="v">${f(r.avg[ci])}</div></div>`).join("")}</div>`).join("");
  const H=["Early game","Mid game","Late game"];
  document.getElementById("lf").innerHTML=`<div class="lr hd"><span></span>${H.map((h,i)=>`<b data-s="${i}" class="${ls==i?"on":""}">${h}${ls==i?" ▼":""}</b>`).join("")}</div>`+sd(res,r=>r.lf[ls]).map(r=>`<div class="lr"><div class="n" title="${UW[r.u]}">${ic(r.u)}${AB[r.u]}</div>${r.lf.map(p=>`<div class="tr"><i style="width:${p||0}%;background:linear-gradient(90deg,#1b7a99,#3de0ff)"></i><em>${p==null?"–":Math.round(p)+"%"}</em></div>`).join("")}</div>`).join("");
@@ -79,6 +79,8 @@ function draw(){
 document.addEventListener("click",e=>{const b=e.target.closest(".ch"),t=e.target.closest("[data-s]");
  if(b){const s=S[b.dataset.k],i=+b.dataset.i;s.has(i)?s.delete(i):s.add(i);chips();draw()}
  if(t){ls=+t.dataset.s;draw()}
+ const w=e.target.closest("[data-w]");if(w){const c=+w.dataset.w;W[c]=Math.max(0,Math.min(300,W[c]+10*+w.dataset.d));draw()}
+ if(e.target.id=="wr"){W.fill(100);draw()}
  if(e.target.id=="rs"){Object.values(S).forEach(s=>s.clear());chips();draw()}});
 chips();draw();
 </script></body></html>
